@@ -39,7 +39,9 @@ class FbBackup:
         sql =   '''
                     SELECT a.RDB$RELATION_NAME
                     FROM RDB$RELATIONS a
-                    WHERE RDB$SYSTEM_FLAG = 0 AND RDB$RELATION_TYPE = 0
+                    where left(a.RDB$RELATION_NAME,4) <> 'RDB$'
+                    and left(a.RDB$RELATION_NAME,4) <> 'MON$'
+                    and left(a.RDB$RELATION_NAME,4) <> 'SEC$'
                 '''
 
         self.cur.execute(sql)
