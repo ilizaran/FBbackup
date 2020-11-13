@@ -59,7 +59,7 @@ class FbBackup:
                 select rf.RDB$FIELD_NAME, f.RDB$FIELD_TYPE, t.RDB$TYPE_NAME  from rdb$relation_fields rf
                 inner join RDB$FIELDS f on rf.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME
                 inner join RDB$TYPES t on f.RDB$FIELD_TYPE = t.RDB$TYPE and t.RDB$FIELD_NAME ='RDB$FIELD_TYPE'
-                where rdb$relation_name='%s'
+                where rdb$relation_name='%s' order by RDB$FIELD_POSITION
                 ''' % table
 
         self.cur.execute(sql)
@@ -96,7 +96,7 @@ class FbBackup:
 
         QUOTATION_TYPES = (14, 37, 35, 40, 12, 13, 261)
         if type in QUOTATION_TYPES:
-            return "'%s'" % str(value)
+            return "'%s'" % str(value).replace("'","\\'")
         
         return str(value)
 
@@ -108,8 +108,8 @@ class FbBackup:
 
     def backup_table(self, table, file):
         fields_names = self.get_fields_names_types(table)
-        fields_txt = ",".join(['"%s"' % item[0] for item in fields_names])
-        insert_txt = 'INSERT INTO "{0}" ({1}) VALUES'.format(table,fields_txt)
+        fields_txt = ",".join(['%s' % item[0] for item in fields_names])
+        insert_txt = 'INSERT INTO {0} ({1}) VALUES'.format(table,fields_txt)
         
         rowcount = self.get_rowcount(table)
 
