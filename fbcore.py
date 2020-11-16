@@ -120,11 +120,19 @@ class FbBackup:
         self.cur.execute(sql)
 
         bar = Bar('Backup table: %s' % table, max=rowcount)
-        for row in self.cur.itermap():
-            list_fields_txt = [self.get_field_str(row[field_name[0]],field_name[1]) for field_name in fields_names]
-            fields_txt = ",".join(list_fields_txt)
-            file.write('{0} ({1});\n'.format(insert_txt, fields_txt))
-            bar.next()
+        while True:
+            try:
+                row = self.cur.fetchonemap()
+                if not row:
+                    break
+                
+                list_fields_txt = [self.get_field_str(row[field_name[0]],field_name[1]) for field_name in fields_names]
+                fields_txt = ",".join(list_fields_txt)
+                file.write('{0} ({1});\n'.format(insert_txt, fields_txt))
+                bar.next()
+            except UnicodeError:
+                print('\n Unicode Error.')
+
         bar.finish()
 
 
